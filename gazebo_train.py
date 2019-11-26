@@ -17,8 +17,8 @@ import roslaunch
 import time
 import numpy as np
 
-import qlearn
-import liveplot
+#import qlearn
+#import liveplot
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import math
@@ -29,7 +29,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 import string
 import robot
-import ros_methods as rm
+#import ros_methods as rm
 
 
 def get_plate(model, letters, invert_dict):
@@ -164,6 +164,22 @@ def contains_white_line(cropped_original_img):
     mask = cv2.inRange(hsv, grey, green)
     return cv2.inRange(mask, 255, 255).any()
 
+def contains_human(cropped_original_img):
+    hsv = cv2.cvtColor(cropped_original_img, cv2.COLOR_BGR2HSV)
+    lower = np.uint8([[[14, 20, 41]]])
+    upper = np.uint8([[[107, 134, 158]]])
+    hsv_low = cv2.cvtColor(lower, cv2.COLOR_BGR2HSV)
+    hsv_high = cv2.cvtColor(upper, cv2.COLOR_BGR2HSV)
+    #print("LOW: {}\nHIGH: {}".format(hsv_low, hsv_high))
+    lower_limit = np.array([hsv_low[0][0][0], hsv_high[0][0][1], hsv_low[0][0][2]])
+    upper_limit = np.array([hsv_high[0][0][0], hsv_low[0][0][1], hsv_high[0][0][2]])
+    mask = cv2.inRange(hsv, lower_limit, upper_limit)
+    #cv2.imshow("mask", cropped_original_img)
+    cv2.imshow("mask1", mask)
+    cv2.waitKey(3)
+    #print("hello")
+    return cv2.inRange(mask, 255, 255).any()
+
 
 def filter_plate(quarter_original_img):
     hsv = cv2.cvtColor(quarter_original_img, cv2.COLOR_BGR2HSV)
@@ -181,7 +197,7 @@ def filter_plate(quarter_original_img):
 K = 2
 D = 20
 timer = 1
-STRAIGT = 1
+STRAIGHT = 1
 BACK = -1
 STOP = 0
 LEFT = 1
@@ -191,44 +207,59 @@ labels = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H
 box_positions = {2: "1", 4: "2", 8: "3", 10: "4", 12: "5", 0: "6"}
 
 if __name__ == '__main__':
+    # env = gym.make('Gazebo_Train-v0')
+    # myrobot = robot.Robot()
+    # time.sleep(7)
+    # while True:
+    #    # cv2.imshow("view", myrobot.view)
+    #    # cv2.waitKey(3)
+    #    contains_human(myrobot.view[390:460, 530:750])
+
     env = gym.make('Gazebo_Train-v0')
     STATE = 0
     myrobot = robot.Robot()
-    conv_model = models.load_model("/home/nickioan/enph353_gym-gazebo/examples/gazebo_train/text_cnn2.h5")
+    conv_model = models.load_model("/home/fizzer/enph353_gym-gazebo/examples/gazebo_train/text_cnn4.h5")
     _, invert_dict = get_encoder(labels)
-    time.sleep(5)
-    myrobot.linearChange(STRAIGT)
+    time.sleep(10)
+    myrobot.linearChange(STRAIGHT)
 
     while STATE == 0:
         img_slice = myrobot.imageSliceVer()
-        for i in range(720):
-            if img_slice[i] == WHITE and i > 450: 
+        for i in reversed(range(720)):
+            if img_slice[i] == WHITE and i > 710: 
                 myrobot.angularChange(LEFT)
                 STATE = 1
                 break
     previous_state = 1000
-    msg = False
+    got_letters = False
 
-    num_lines = 0
     debounce = 0
+    pedestrian_passed = False
     while STATE == 1:
         img_slice = myrobot.imageSliceHor()
         cropped_original = myrobot.view[650:, :]
-        if(debounce > 50 and contains_white_line(cropped_original)):
-            num_lines += 1
+        if(debounce > 200 and contains_white_line(cropped_original)):
+            myrobot.position = (myrobot.position + 1)%16
+            print("debounce: {}".format(debounce))
+            print("position: {}".format(myrobot.position))
             debounce = 0
-            myrobot.updatePosition(num_lines)
-        quarter_original_img = myrobot.view[360:, :600]
+            pedestrian_passed = False
+        if(pedestrian_passed is False and myrobot.position == 5 or myrobot.position == 13):
+            while(pedestrian_passed is False and not contains_human(myrobot.view[390:460, 530:750])):
+                myrobot.linearChange(STOP)
+            while(contains_human(myrobot.view[390:460, 530:750])):
+                myrobot.linearChange(STOP)
+            pedestrian_passed = True
+        quarter_original_img = myrobot.view[360:, :500]
         plate_mask = filter_plate(quarter_original_img)
         success, plates = find_contours(plate_mask, quarter_original_img)
         if success:
             masked_plate = filter_blue(plates[len(plates) - 1])
             got_letters, letters = find_letters(masked_plate, plates[len(plates) - 1])
-            if got_letters is True:
-                msg = True
-        if msg is True and myrobot.position in box_positions:
+        if got_letters is True and myrobot.position in box_positions:
             get_plate(conv_model, letters, invert_dict)
-            msg = False
+            print(box_positions[myrobot.position])
+            got_letters = False
         for i in reversed(range(600, 1280)):
             if img_slice[i] == WHITE:
                 break
@@ -246,7 +277,7 @@ if __name__ == '__main__':
         elif i > 1260 - total_error:
             myrobot.angularChange(RIGHT)
         else:
-            myrobot.linearChange(STRAIGT)
+            myrobot.linearChange(STRAIGHT)
         previous_state = i
         debounce += 1
         timer += 1

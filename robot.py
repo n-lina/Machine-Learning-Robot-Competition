@@ -17,8 +17,8 @@ import roslaunch
 import time
 import numpy as np
 
-import qlearn
-import liveplot
+#import qlearn
+#import liveplot
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import math
@@ -27,7 +27,7 @@ from sensor_msgs.msg import Image
 from matplotlib import pyplot as plt
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-import ros_methods as rm
+#import ros_methods as rm
 import string
 
 
@@ -60,7 +60,7 @@ class Robot:
         self.__vel.publish(vel_msg)
 
     def imageSliceVer(self):
-        img = self.view[:, 700:701]
+        img = self.view[:, 639:640]
         threshold = 128
         cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
@@ -73,5 +73,5 @@ class Robot:
         _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
         return cv_bin[0, :]
     
-    def updatePosition(self, position):
-        self.position = position % 16
+    #def updatePosition(self, position):
+     #   self.position = position
