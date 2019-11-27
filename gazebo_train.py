@@ -148,10 +148,10 @@ def filter_plate(quarter_original_img):
     return mask
 
 
-K = 2
-D = 20
+K = 3
+D = 25
 K_inner = 3
-D_inner = 40
+D_inner = 27
 timer = 1
 STRAIGHT = 1
 BACK = -1
@@ -177,19 +177,23 @@ if __name__ == '__main__':
         while STATE == 0:
             img_slice = myrobot.imageSliceVer()
             for i in range(720):
-                if img_slice[i] == WHITE and i > 700:
+                if img_slice[i] == WHITE and i > 718:
                     myrobot.angularChange(LEFT)
                     STATE = 1
                     break
-
-        previous_state = 1000
+        
+        img_slice = myrobot.imageSliceHor()
+        for i in reversed(range(600, 1280)):
+            if img_slice[i] == WHITE:
+                break
+        previous_state = i
         got_letters = False
         black = 0
         pedestrian_passed = False
 
         while STATE == 1:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[650:, :]
+            cropped_original = myrobot.view[670:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     black = 0
@@ -243,12 +247,13 @@ if __name__ == '__main__':
         black = 0
         while STATE == 2:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[650:, :]
+            cropped_original = myrobot.view[670:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     myrobot.inner_position = (myrobot.inner_position+1)
                     black = 0
             else:
+                
                 black += 1
             quarter_original_img = myrobot.view[360:, 600:]
             plate_mask = filter_plate(quarter_original_img)
@@ -285,4 +290,3 @@ if __name__ == '__main__':
                 myrobot.linearChange(STRAIGHT)
             previous_state = i
             timer += 1
-
