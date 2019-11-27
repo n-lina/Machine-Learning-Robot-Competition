@@ -2,10 +2,7 @@ import gym
 from gym import wrappers
 import gym_gazebo
 import time
-import numpy
 import random
-import time
-import os
 from keras import models
 from sklearn.preprocessing import LabelEncoder
 from keras.utils import to_categorical
@@ -21,14 +18,10 @@ import numpy as np
 #import liveplot
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
-import math
 from sensor_msgs.msg import Image
 
-from matplotlib import pyplot as plt
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
-#import ros_methods as rm
-import string
 
 
 class Robot:
@@ -47,6 +40,10 @@ class Robot:
         except CvBridgeError as e:
             print(e)
         self.view = cv_image
+
+    def publishLicensePlate(self, location, plate):
+        msg = "TeamLNI,password,{},{}".format(location, plate)
+        self.__plate.publish(msg)
     
     def linearChange(self, speed):
         vel_msg = Twist()
