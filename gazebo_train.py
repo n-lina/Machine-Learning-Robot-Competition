@@ -123,18 +123,21 @@ def contains_human(cropped_original_img):
 
 
 #[500:,200:700]
-def car_mask(img):
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    grey_line = np.uint8([[[0, 0, 0]]])
-    green_line = np.uint8([[[4, 4, 4]]])
-    hsv_low = cv2.cvtColor(grey_line, cv2.COLOR_BGR2HSV)
-    hsv_high = cv2.cvtColor(green_line, cv2.COLOR_BGR2HSV)
-    grey = np.array([hsv_low[0][0][0], hsv_low[0][0][1], hsv_low[0][0][2]])
-    green = np.array([hsv_high[0][0][0], hsv_high[0][0][1], hsv_high[0][0][2]])
-    mask = cv2.inRange(hsv, grey, green)
-    cv2.imshow("mask",mask)
-    cv2.waitKey(3)
-    return cv2.inRange(mask, 255, 255).any()
+def ideal_car_position(cropped_original_img):
+    hsv = cv2.cvtColor(cropped_original_img, cv2.COLOR_BGR2HSV)
+    lower_limit = np.uint8([[[0, 0, 0]]])
+    upper_limit = np.uint8([[[6, 6, 6]]])
+    hsv_low = cv2.cvtColor(lower_limit, cv2.COLOR_BGR2HSV)
+    hsv_high = cv2.cvtColor(upper_limit, cv2.COLOR_BGR2HSV)
+    lower = np.array([hsv_low[0][0][0], hsv_low[0][0][1], hsv_low[0][0][2]])
+    upper = np.array([hsv_high[0][0][0], hsv_high[0][0][1], hsv_high[0][0][2]])
+    mask = cv2.inRange(hsv, lower, upper)
+    # cv2.imshow("mask",mask)
+    # cv2.waitKey(3)
+    num_pixels = cv2.countNonZero(cv2.inRange(mask, 255, 255))
+    if(num_pixels > 13 and num_pixels < 140):
+        return True
+    return False
 
 
 def filter_plate(quarter_original_img):
@@ -149,10 +152,10 @@ def filter_plate(quarter_original_img):
     return mask
 
 
-K = 2
-D = 20
+K = 3
+D = 25
 K_inner = 3
-D_inner = 40
+D_inner = 27
 timer = 1
 STRAIGHT = 1
 BACK = -1
@@ -172,7 +175,9 @@ if __name__ == '__main__':
     # while True:
     # #    cv2.imshow("view", myrobot.view)
     # #    cv2.waitKey(3)
-    #    contains_human(myrobot.view[390:460, 530:750])
+    #     cv2.imshow("pic", myrobot.view[:,700:])
+    #     cv2.waitKey(3)
+       
 
     env = gym.make('Gazebo_Train-v0')
     STATE = 0
@@ -186,7 +191,7 @@ if __name__ == '__main__':
         while STATE == 0:
             img_slice = myrobot.imageSliceVer()
             for i in range(720):
-                if img_slice[i] == WHITE and i > 718:
+                if img_slice[i] == WHITE and i > 710:
                     myrobot.angularChange(LEFT)
                     STATE = 1
                     break
@@ -198,7 +203,7 @@ if __name__ == '__main__':
 
         while STATE == 1:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[650:, :]
+            cropped_original = myrobot.view[670:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     black = 0
@@ -206,12 +211,14 @@ if __name__ == '__main__':
                     pedestrian_passed = False
             else:
                 black += 1
+
             if(pedestrian_passed is False and myrobot.position == 5 or myrobot.position == 13):
                 while(pedestrian_passed is False and not contains_human(myrobot.view[390:460, 530:750])):
                     myrobot.linearChange(STOP)
                 while(contains_human(myrobot.view[390:460, 530:750])):
                     myrobot.linearChange(STOP)
                 pedestrian_passed = True
+
             quarter_original_img = myrobot.view[360:, :600]
             plate_mask = filter_plate(quarter_original_img)
             success, plates = find_contours(plate_mask, quarter_original_img)
@@ -221,9 +228,11 @@ if __name__ == '__main__':
             if got_letters is True and myrobot.position in box_positions:
                 get_plate(conv_model, letters, invert_dict)
                 got_letters = False
+
             if myrobot.position == 8:
                 STATE = 2
                 break
+
             for i in reversed(range(600, 1280)):
                 if img_slice[i] == WHITE:
                     break
@@ -245,6 +254,7 @@ if __name__ == '__main__':
             timer += 1
 
         straight = [3, 5, 7]
+        car_passed = False 
         for i in reversed(range(700)):
             if img_slice[i] == WHITE:
                 break
@@ -252,13 +262,20 @@ if __name__ == '__main__':
         black = 0
         while STATE == 2:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[650:, :]
+            cropped_original = myrobot.view[670:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     myrobot.inner_position = (myrobot.inner_position+1)
                     black = 0
             else:
                 black += 1
+
+            if car_passed is False and myrobot.inner_position == 1: 
+                while (not ideal_car_position(myrobot.view[250:550, 600:])):
+                    myrobot.linearChange(STOP)
+                car_passed = True 
+                print("go")
+
             quarter_original_img = myrobot.view[360:, 600:]
             plate_mask = filter_plate(quarter_original_img)
             success, plates = find_contours(plate_mask, quarter_original_img)
@@ -268,10 +285,12 @@ if __name__ == '__main__':
             if got_letters is True and myrobot.inner_position in inner_box_positions:
                 get_plate(conv_model, letters, invert_dict)
                 got_letters = False
+
             if myrobot.inner_position in straight:
                 myrobot.linearChange(STRAIGHT)
                 continue
             if myrobot.inner_position == 11:
+                myrobot.inner_position = 0
                 myrobot.position += 1
                 STATE = 1
                 break

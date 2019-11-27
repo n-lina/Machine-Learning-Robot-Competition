@@ -61,7 +61,7 @@ class Robot:
         self.__vel.publish(vel_msg)
 
     def imageSliceVer(self):
-        img = self.view[:, 639:640]
+        img = self.view[:, 500:501]
         threshold = 128
         cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
