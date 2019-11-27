@@ -47,8 +47,8 @@ def get_encoder(data):
 
 def filter_blue(original_img):
     hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
-    low = np.uint8([[[80, 0, 0]]])
-    up = np.uint8([[[200, 96, 96]]])
+    low = np.uint8([[[40, 0, 0]]])
+    up = np.uint8([[[255, 96, 96]]])
 
     hsv_low = cv2.cvtColor(low, cv2.COLOR_BGR2HSV)
     hsv_high = cv2.cvtColor(up, cv2.COLOR_BGR2HSV)
@@ -66,11 +66,15 @@ def find_letters(binaryImg, drawOn):
     dimensions = []
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
-        if x-3 < 0:
-            x = 0
-        else:
+        if x > 3:
             x = x-3
-        corners = (x, y-3, w+6, h+8)
+        else: 
+            x = 0
+        if y > 3: 
+            y = y-3
+        else: 
+            y = 0
+        corners = (x, y, w+6, h+8)
         dimensions.append(corners)
     dimensions = sorted(dimensions, key=lambda l: l[0])
 
@@ -126,7 +130,7 @@ def contains_human(cropped_original_img):
 def ideal_car_position(cropped_original_img):
     hsv = cv2.cvtColor(cropped_original_img, cv2.COLOR_BGR2HSV)
     lower_limit = np.uint8([[[0, 0, 0]]])
-    upper_limit = np.uint8([[[6, 6, 6]]])
+    upper_limit = np.uint8([[[10, 10, 10]]])
     hsv_low = cv2.cvtColor(lower_limit, cv2.COLOR_BGR2HSV)
     hsv_high = cv2.cvtColor(upper_limit, cv2.COLOR_BGR2HSV)
     lower = np.array([hsv_low[0][0][0], hsv_low[0][0][1], hsv_low[0][0][2]])
@@ -135,7 +139,8 @@ def ideal_car_position(cropped_original_img):
     # cv2.imshow("mask",mask)
     # cv2.waitKey(3)
     num_pixels = cv2.countNonZero(cv2.inRange(mask, 255, 255))
-    if(num_pixels > 13 and num_pixels < 140):
+    #print(num_pixels)
+    if(num_pixels > 10 and num_pixels < 140):
         return True
     return False
 
@@ -173,10 +178,9 @@ if __name__ == '__main__':
     # myrobot = robot.Robot()
     # time.sleep(7)
     # while True:
-    # #    cv2.imshow("view", myrobot.view)
-    # #    cv2.waitKey(3)
-    #     cv2.imshow("pic", myrobot.view[:,700:])
-    #     cv2.waitKey(3)
+    #     ideal_car_position(myrobot.view[250:550, 600:])
+    #     # cv2.imshow("pic", myrobot.view[250:550, 600:])
+    #     # cv2.waitKey(3)
        
 
     env = gym.make('Gazebo_Train-v0')
@@ -184,26 +188,37 @@ if __name__ == '__main__':
     myrobot = robot.Robot()
     conv_model = models.load_model("/home/fizzer/enph353_gym-gazebo/examples/gazebo_train/text_cnn4.h5")
     _, invert_dict = get_encoder(labels)
-    time.sleep(10)
+    time.sleep(7)
     myrobot.linearChange(STRAIGHT)
 
     while True:
         while STATE == 0:
             img_slice = myrobot.imageSliceVer()
             for i in range(720):
-                if img_slice[i] == WHITE and i > 710:
+                if img_slice[i] == WHITE and i > 712:
                     myrobot.angularChange(LEFT)
                     STATE = 1
                     break
-
+        while STATE == 3:
+            img_slice = myrobot.imageSliceVertical()
+            for i in range(720):
+                if img_slice[i] == WHITE and i > 712:
+                    myrobot.angularChange(STRAIGHT)
+                    STATE = 1
+                    break
+        # img_slice = myrobot.imageSliceHor()
+        # for i in reversed(range(500, 1280)):
+        #     if img_slice[i] == WHITE:
+        #         break
         previous_state = 1000
+        #print(previous_state)
         got_letters = False
         black = 0
         pedestrian_passed = False
 
         while STATE == 1:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[670:, :]
+            cropped_original = myrobot.view[660:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     black = 0
@@ -230,6 +245,7 @@ if __name__ == '__main__':
                 got_letters = False
 
             if myrobot.position == 8:
+                myrobot.position = 9
                 STATE = 2
                 break
 
@@ -255,14 +271,17 @@ if __name__ == '__main__':
 
         straight = [3, 5, 7]
         car_passed = False 
-        for i in reversed(range(700)):
-            if img_slice[i] == WHITE:
-                break
-            previous_state = i
+        previous_state = 170
+        # for i in reversed(range(700)):
+        #     if img_slice[i] == WHITE:
+        #         break
+        #     previous_state = i
+        #     print("first" + str(previous_state))
+            
         black = 0
         while STATE == 2:
             img_slice = myrobot.imageSliceHor()
-            cropped_original = myrobot.view[670:, :]
+            cropped_original = myrobot.view[660:, :]
             if contains_white_line(cropped_original):
                 if black > 150:
                     myrobot.inner_position = (myrobot.inner_position+1)
@@ -271,10 +290,9 @@ if __name__ == '__main__':
                 black += 1
 
             if car_passed is False and myrobot.inner_position == 1: 
-                while (not ideal_car_position(myrobot.view[250:550, 600:])):
+                while (not ideal_car_position(myrobot.view[250:550, 500:])):
                     myrobot.linearChange(STOP)
                 car_passed = True 
-                print("go")
 
             quarter_original_img = myrobot.view[360:, 600:]
             plate_mask = filter_plate(quarter_original_img)
@@ -291,7 +309,7 @@ if __name__ == '__main__':
                 continue
             if myrobot.inner_position == 11:
                 myrobot.inner_position = 0
-                myrobot.position += 1
+                #myrobot.position += 1
                 STATE = 1
                 break
             for i in reversed(range(700)):
@@ -305,7 +323,7 @@ if __name__ == '__main__':
             diff = K_inner*error
             derivative = D_inner*d_error
             total_error = diff + derivative
-            if i < 30 - total_error:
+            if i < 40 - total_error:
                 myrobot.angularChange(LEFT)
             elif i > 150 - total_error:
                 myrobot.angularChange(RIGHT)

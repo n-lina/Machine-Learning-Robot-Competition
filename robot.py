@@ -69,7 +69,14 @@ class Robot:
 
     def imageSliceHor(self):
         threshold = 128
-        img = self.view[700:701, :]
+        img = self.view[690:691, :]
         cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
         return cv_bin[0, :]
+
+    def imageSliceVertical(self):
+        img = self.view[:, 200:201]
+        threshold = 128
+        cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
+        return cv_bin[:, 0]
