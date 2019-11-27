@@ -33,6 +33,7 @@ import string
 
 class Robot:
     def __init__(self):
+        self.inner_position = 0
         self.position = 0
         self.view = []
         rospy.Subscriber("R1/pi_camera/image_raw", Image, self.__getImage)
@@ -72,6 +73,3 @@ class Robot:
         cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, cv_bin = cv2.threshold(cv_grey, threshold, 255, cv2.THRESH_BINARY)
         return cv_bin[0, :]
-    
-    #def updatePosition(self, position):
-     #   self.position = position
