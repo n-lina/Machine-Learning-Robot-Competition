@@ -33,7 +33,7 @@ def get_plate(model, letters, invert_dict):
         plate.append(result)
     license_plate = string.join(plate)
     print(license_plate)
-    return
+    return license_plate
 
 
 def get_encoder(data):
@@ -47,8 +47,8 @@ def get_encoder(data):
 
 def filter_blue(original_img):
     hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
-    low = np.uint8([[[80, 0, 0]]])
-    up = np.uint8([[[200, 96, 96]]])
+    low = np.uint8([[[40, 0, 0]]])
+    up = np.uint8([[[255, 96, 96]]])
 
     hsv_low = cv2.cvtColor(low, cv2.COLOR_BGR2HSV)
     hsv_high = cv2.cvtColor(up, cv2.COLOR_BGR2HSV)
@@ -70,7 +70,11 @@ def find_letters(binaryImg, drawOn):
             x = 0
         else:
             x = x-3
-        corners = (x, y-3, w+6, h+8)
+        if y-3 < 0:
+            y = 0
+        else:
+            y = y - 3
+        corners = (x, y, w+6, h+8)
         dimensions.append(corners)
     dimensions = sorted(dimensions, key=lambda l: l[0])
 
@@ -122,11 +126,10 @@ def contains_human(cropped_original_img):
     return cv2.inRange(mask, 255, 255).any()
 
 
-#[500:,200:700]
 def ideal_car_position(cropped_original_img):
     hsv = cv2.cvtColor(cropped_original_img, cv2.COLOR_BGR2HSV)
     lower_limit = np.uint8([[[0, 0, 0]]])
-    upper_limit = np.uint8([[[6, 6, 6]]])
+    upper_limit = np.uint8([[[10, 10, 10]]])
     hsv_low = cv2.cvtColor(lower_limit, cv2.COLOR_BGR2HSV)
     hsv_high = cv2.cvtColor(upper_limit, cv2.COLOR_BGR2HSV)
     lower = np.array([hsv_low[0][0][0], hsv_low[0][0][1], hsv_low[0][0][2]])
@@ -153,9 +156,9 @@ def filter_plate(quarter_original_img):
 
 
 K = 3
-D = 25
+D = 23
 K_inner = 3
-D_inner = 27
+D_inner = 25
 timer = 1
 STRAIGHT = 1
 BACK = -1
@@ -177,14 +180,13 @@ if __name__ == '__main__':
     # #    cv2.waitKey(3)
     #     cv2.imshow("pic", myrobot.view[:,700:])
     #     cv2.waitKey(3)
-       
-
+    
     env = gym.make('Gazebo_Train-v0')
     STATE = 0
     myrobot = robot.Robot()
-    conv_model = models.load_model("/home/fizzer/enph353_gym-gazebo/examples/gazebo_train/text_cnn4.h5")
+    conv_model = models.load_model("/home/nickioan/enph353_gym-gazebo/examples/gazebo_train/text_cnn8.h5")
     _, invert_dict = get_encoder(labels)
-    time.sleep(10)
+    time.sleep(5)
     myrobot.linearChange(STRAIGHT)
 
     while True:
@@ -224,9 +226,12 @@ if __name__ == '__main__':
             success, plates = find_contours(plate_mask, quarter_original_img)
             if success:
                 masked_plate = filter_blue(plates[len(plates) - 1])
+                # cv2.imshow("plate", masked_plate)
+                # cv2.waitKey(3)
                 got_letters, letters = find_letters(masked_plate, plates[len(plates) - 1])
             if got_letters is True and myrobot.position in box_positions:
-                get_plate(conv_model, letters, invert_dict)
+                plate = get_plate(conv_model, letters, invert_dict)
+                myrobot.publishLicensePlate(box_positions[myrobot.position], plate)
                 got_letters = False
 
             if myrobot.position == 8:
@@ -271,10 +276,9 @@ if __name__ == '__main__':
                 black += 1
 
             if car_passed is False and myrobot.inner_position == 1: 
-                while (not ideal_car_position(myrobot.view[250:550, 600:])):
+                while (not ideal_car_position(myrobot.view[250:550, 500:])):
                     myrobot.linearChange(STOP)
                 car_passed = True 
-                print("go")
 
             quarter_original_img = myrobot.view[360:, 600:]
             plate_mask = filter_plate(quarter_original_img)
@@ -283,7 +287,8 @@ if __name__ == '__main__':
                 masked_plate = filter_blue(plates[len(plates) - 1])
                 got_letters, letters = find_letters(masked_plate, plates[len(plates) - 1])
             if got_letters is True and myrobot.inner_position in inner_box_positions:
-                get_plate(conv_model, letters, invert_dict)
+                plate = get_plate(conv_model, letters, invert_dict)
+                myrobot.publishLicensePlate(inner_box_positions[myrobot.inner_position], plate)
                 got_letters = False
 
             if myrobot.inner_position in straight:
