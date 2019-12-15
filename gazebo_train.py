@@ -31,8 +31,9 @@ def get_plate(model, letters, invert_dict):
         result_int = np.argmax(y_predict)
         result = invert_dict[result_int]
         plate.append(result)
-    license_plate = string.join(plate)
-    print(license_plate)
+    seperator = ''
+    license_plate = seperator.join(plate)
+    #print(license_plate)
     return license_plate
 
 
@@ -140,6 +141,7 @@ def ideal_car_position(cropped_original_img):
     num_pixels = cv2.countNonZero(cv2.inRange(mask, 255, 255))
     #print(num_pixels)
     if(num_pixels > 10 and num_pixels < 140):
+    # if(num_pixels > 1000):
         return True
     return False
 
@@ -157,9 +159,9 @@ def filter_plate(quarter_original_img):
 
 
 K = 3
-D = 23
+D = 25
 K_inner = 3
-D_inner = 25
+D_inner = 28
 timer = 1
 STRAIGHT = 1
 BACK = -1
@@ -168,40 +170,33 @@ LEFT = 1
 RIGHT = -1
 WHITE = 255
 labels = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
-box_positions = {2: "1", 4: "2", 8: "3", 10: "4", 12: "5", 0: "6"}
-inner_box_positions = {4: "7", 8: "6"}
+box_positions = {2: "2", 4: "3", 8: "4", 10: "5", 12: "6", 0: "1"}
+inner_box_positions = {4: "8", 8: "7"}
 
 
 if __name__ == '__main__':
-    # env = gym.make('Gazebo_Train-v0')
-    # myrobot = robot.Robot()
-    # time.sleep(7)
-    # while True:
-    # #    cv2.imshow("view", myrobot.view)
-    # #    cv2.waitKey(3)
-    #     cv2.imshow("pic", myrobot.view[:,700:])
-    #     cv2.waitKey(3)
-    
-    env = gym.make('Gazebo_Train-v0')
+    rospy.init_node("my_node")
     STATE = 0
     myrobot = robot.Robot()
-    conv_model = models.load_model("/home/nickioan/enph353_gym-gazebo/examples/gazebo_train/text_cnn8.h5")
+    conv_model = models.load_model("/home/fizzer/enph353_gym-gazebo/examples/gazebo_train/text_cnn7.h5")
     _, invert_dict = get_encoder(labels)
-    time.sleep(7)
+    myrobot.publishLicensePlate(0, "XX00")
+    #time.sleep(7)
     myrobot.linearChange(STRAIGHT)
 
     while True:
         while STATE == 0:
             img_slice = myrobot.imageSliceVer()
             for i in range(720):
-                if img_slice[i] == WHITE and i > 712:
+                if img_slice[i] == WHITE and i > 600:
                     myrobot.angularChange(LEFT)
+                    rospy.sleep(0.4)
                     STATE = 1
                     break
         while STATE == 3:
             img_slice = myrobot.imageSliceVertical()
             for i in range(720):
-                if img_slice[i] == WHITE and i > 712:
+                if img_slice[i] == WHITE and i > 715:
                     myrobot.angularChange(STRAIGHT)
                     STATE = 1
                     break
@@ -227,9 +222,9 @@ if __name__ == '__main__':
                 black += 1
 
             if(pedestrian_passed is False and myrobot.position == 5 or myrobot.position == 13):
-                while(pedestrian_passed is False and not contains_human(myrobot.view[390:460, 530:750])):
+                while(pedestrian_passed is False and not contains_human(myrobot.view[390:460, 540:740])):
                     myrobot.linearChange(STOP)
-                while(contains_human(myrobot.view[390:460, 530:750])):
+                while(contains_human(myrobot.view[390:460, 540:740])):
                     myrobot.linearChange(STOP)
                 pedestrian_passed = True
 
@@ -292,7 +287,7 @@ if __name__ == '__main__':
                 black += 1
 
             if car_passed is False and myrobot.inner_position == 1: 
-                while (not ideal_car_position(myrobot.view[250:550, 500:])):
+                while (not ideal_car_position(myrobot.view[250:400, 400:])):
                     myrobot.linearChange(STOP)
                 car_passed = True 
 
