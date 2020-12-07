@@ -187,11 +187,11 @@ the lower image quality of the expected data and then generated a diverse set of
 images using the ImageDataGenerator class from Keras as shown below:
 
 ```py
-d at a g e n = Im a g e D at a G e n e r at o r (
-      r e s c a l e = 1 . / 2 5 5 ,
-      s h e a r _ r a n g e = 2 5 . 0 ,
-      b r i g h t n e s s _ r a n g e = [ 0 . 2 , 1 . 0 ] ,
-      zoom_ range = [ 0 . 5 , 1 . 5 ] ,
+datagen = ImageDataGenerator(
+      rescale = 1/255,
+      shear_range = 25.0,
+      brightness_range = [0.2, 1.0],
+      zoom_ range = [0.5, 1.5],
       h o r i z o n t a l _ f l i p = F al s e , )
 h i s t o r y _ c o n v = conv_model . f i t _ g e n e r a t o r ( d at a g e n . fl ow ( X _t r ai n ,
 Y _t r ai n , b a t c h _ s i z e = 3 2 ) , v a l i d a t i o n _ d a t a = ( X _t e st , Y _ t e s t ) ,
