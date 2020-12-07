@@ -5,7 +5,7 @@
 
 **Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
 
-**Result: Placed 4th out of 20 teams!**
+**Result:** Placed 4th out of 20 teams!
 
 <br>
 <pre>Competition Surface Rendered in Gazebo</pre>
