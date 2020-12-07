@@ -1,41 +1,35 @@
 # Machine Learning Robot Competition
 ## Competition Overview
-The scope of this project is to develop a software agent that would control a
-robot and navigate across a simulated world while reporting license plates and
-their location. While navigating the agent should be able to avoid obstacles such
-as other vehicles and pedestrians and follow standard traffic rules. The simulation
-was built in Gazebo and the agent takes live image feed from the in-simulation
-camera mounted on top of the robot. The agent must interact with the world in
-ROS, while it is scripted using python 2.7. The competition itself consists of a four
-minutes trial where the agent must individually and autonomously run along the
-track and report as many license plate possible
 
-## Project Overview 
-In order to target this project we decided from the early stages our general software
-architecture. We concluded with having a main script that would handle the image
-processing and decision making of the agent, and a class that would handle the
-interaction between the simulation and our main script. Since our only data input
-was live image feed from the simulation, we decided to use the unique color that
-elements of interest had i.e. the blue colour of the boxes, the white lines. Hence,
-for most of our decision making we utilize colour masking after converting our
-RGB image feed to HSV. In regards of the text recognition, we implemented a
-Convolutional Neural Network with three layers which we trained and validated
-through custom data that we generated.
+**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and trucks, and to accuractely recognize and read alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
-## Task Breakdown 
-In order to reach our goal we had to break down the task in several modules. The
-full Project Breakdown can be found listed below. An overview for each module is
-explored in its representative section
--  Robot Class
--  Navigation
--  License Plate Detection & Recognition
--  Obstacle Detection & Handling
+**Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
+
+**Result: Placed 4th out of 20 teams!**
+
+<br>
+<pre>Competition Surface Rendered in Gazebo</pre>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/compSurface.PNG?raw=true" width="600" height="600"/>\
+<br>
+
+### Technologies Used 
+-   **Gazebo Physics Engine:** the 3D Robotics simulation that served as the competition surface 
+-   **Robot Operating System:** a flexible framework for writing robot software, used to define the robot object
+-   **Python Programming Language:** used to process the robot's interactions with its environment; used to implemenent autonomous navigation, alphanumeric character detection via a neural network, and object detection via OpenCV
+    -    **OpenCV:** used Open Computer Vision to allow the robot to sense its environment and to avoid pedestrians and the truck. 
+-   **Keras:** a deep learning API written in Python, running on top of Tensorflow
+-   **Tensorflow:** the open-source library for a number of various tasks in machine learning
+    -   Keras and Tensorflow were used to develop, train, and test the convoluted neural network responsible for alphanumeric license plate parsing. 
+    
+
+## Software Components 
+- main script that would handle the image processing and decision making of the agent
+- Robot class: a class that would handle the interaction between the simulation and our main script
+    - Since our only data input was live image feed from the simulation, we decided to use the unique color that elements of interest had i.e. the blue colour of the boxes, the white lines. Hence, for most of our decision making we utilize colour masking after converting our RGB image feed to HSV. 
+- Convolutional Neural Network with three layers which we trained and validated through custom data that we generated.
 
 ## Robot Class
-In this section we explore the class we created to handle the interaction between
-the Gazebo world and our main script. We ensured to utilize public and private
-attributes/methods, in order to separate, encapsulate our systems and highlight the
-unique interaction of the Robot class with the Gazebo simulation.
+In this section we explore the class we created to handle the interaction between the Gazebo world and our main script. 
 
 ### Constructor 
 The attributes of the Robot object initialized consist an inner loop position tracker
