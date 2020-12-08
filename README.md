@@ -83,9 +83,9 @@ Using **colour masking** and looking for the known aspect ratio of the license p
 Using a python script, we generated thousands of license plates, extracted their characters, and input them into our neural network for training.
 
 <pre> Example License Plate </pre> 
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true"/>\
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true" width = "200"/>
 <pre> Data generation and Neural Network Training Pipeline </pre>  
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.PNG?raw=true"/>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.PNG?raw=true" width="500"/>
 
 
 ### Convoluted Neural Network 
