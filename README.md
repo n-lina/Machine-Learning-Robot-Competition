@@ -1,7 +1,7 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely recognize and read alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
 **Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
 
@@ -71,7 +71,6 @@ In order to navigate across the outer loop, we monitored the robot's distance to
 -  Robot is too close to the line: TURN LEFT
 -  Drive Straight otherwise <br>
   <br>
-
 The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
 
 The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
@@ -79,62 +78,42 @@ The Derivative component was calculated by multiplying by a constant the change 
 ## Neural Network For Alphanumeric Character Detection 
 
 ### License Plate Detection 
-Each box contained two rectangular contours. The first one had the information for
-the location and the second one consisted the license plate. Due to the dimensions
-of the first contour for the location we realized that it was more reliable detecting it
-while navigating, hence our algorithm followed the following approach.
--  Continuously monitor the latest frame for a location plate after masking it
-with respect to its colour
--  Use the aspect ratio between the location plate and license plate which was
-experimentally determined, to approximate the position of the license plate
--  Mask the license plate with a blue filter and convert it into binary
--  Retrieve a rectangle contour for each letter and number
--  Pass each contour through a CNN to retrieve each value <br>
-<br>
-As a factor of safety and to reduce the computational complexity of our system
-we only passed through the CNN the latest set of letter/number contours that we
-retrieved, after crossing a parallel line that preceded a box. This enabled us to take the most accurate reading from the batch after our robot had the most time to
-correct its position. This also reduced the necessity of a high performance CNN,
-since our input data was of low variation.
+Using **colour masking** and looking for the known aspect ratio of the license plate, we extracted the license plate from the robot's live-image feed. While we discuss ideal images of license plates next, the license plates extracted from the Gazebo world were often sheared, blurry, and imperfect due to the robot's motion and angle! 
+
+<pre> Using a python script, we generated thousands of these license plates, extracted their characters, and input them into our neural network for training. <pre> 
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true"/>\
+<pre> Data generation and Neural Network Training Pipeline <pre> 
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.png?raw=true"/>
+
 
 ### Convoluted Neural Network 
 The architecture of our Convolutional Neural Network is as Following:
 
 ``` py 
-from k e r a s impor t m o del s
-conv_model = m o del s . S e q u e n t i a l ( )
+from keras import models
+conv_model = models.Sequential()
 #BLOCK 1
-conv_model . add ( l a y e r s . Conv2D ( 1 6 , ( 3 , 3 ) , a c t i v a t i o n = ’ r e l u ’ ,
-i n p u t _ s h a p e = ( 3 2 , 3 2 , 3 ) ) )
-conv_model . add ( l a y e r s . MaxPooling2D ( ( 2 , 2 ) ) )
+conv_model.add(layers.Conv2D(16,(3,3),activation=’relu’, input_shape = (32, 32, 3)))
+conv_model.add(layers.MaxPooling2D((2, 2)))
 #BLOCK 2
-conv_model . add ( l a y e r s . Conv2D ( 1 6 , ( 3 , 3 ) , a c t i v a t i o n = ’ r e l u ’ ) )
-conv_model . add ( l a y e r s . MaxPooling2D ( ( 2 , 2 ) ) )
+conv_model.add(layers.Conv2D(16,(3,3),activation = ’relu’))
+conv_model.add(layers.MaxPooling2D((2,2)))
 #BLOCK 3
-conv_model . add ( l a y e r s . Conv2D ( 3 2 , ( 3 , 3 ) , a c t i v a t i o n = ’ r e l u ’ ) )
-conv_model . add ( l a y e r s . MaxPooling2D ( ( 2 , 2 ) ) )
-conv_model . add ( l a y e r s . F l a t t e n ( ) )
-conv_model . add ( l a y e r s . D r o p o ut ( 0 . 3 ) )
-conv_model . add ( l a y e r s . Dense ( 2 5 6 , a c t i v a t i o n = ’ r e l u ’ ) )
-conv_model . add ( l a y e r s . Dense ( 3 6 , a c t i v a t i o n = ’ s o ftm a x ’ ) )
+conv_model.add(layers.Conv2D(32,(3,3),activation= ’relu’))
+conv_model.add(layers.MaxPooling2D (( 2 , 2 )))
+conv_model.add(layers.Flatten())
+conv_model.add(layers.Dropout(0.3))
+conv_model.add(layers.Dense(256,activation = ’relu’))
+conv_model.add(layers.Dense(36,activation = ’softmax’))
 ```
 
-A summary of the model can be found in appendix A Figure A.2.
+<pre> Summary of the CNN model (DELETE: appendix A Figure A.2.) <pre> 
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnSummary.png?raw=true"/>\
 
-While designing the architecture of the CNN we noticed that the average
-shape of the letter/number contours that we extracted was around 28x30 pixels
-hence to avoid the distortion of information while interpolating when resizing we
-chose an input shape of 32x32 pixels, and hence the maximum amount of layers
-(Convolution-Max Pooling) our model could be was three.
+Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 piexels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
 
 ### Convoluted Neural Network Training and Validation 
-As mentioned in the previous section, our approach for finding the letters/numbers
-of the license plate reduced the dependency of high performance CNN, and hence
-a were able to generate custom dataset from the original blank plate. As a factor
-of safety though we implemented certain measurements to ensure that we are
-diversifying and not over-fitting our data. We first used Gaussian Blur to simulate
-the lower image quality of the expected data and then generated a diverse set of
-images using the ImageDataGenerator class from Keras as shown below:
+To best replicate the actual inputs coming from the Gazebo simulation, we used Gaussian Blur to lower the image quality of the perfect license plates. We also targeted 'difficult' characters, like 'B' vs. '8' or '1' vs. 'I', by generating an abundance of input data with these characters. We used **Keras** ImageDataGenerator to then generate a representative collection of inputs: 
 
 ```py
 datagen = ImageDataGenerator(
@@ -142,53 +121,20 @@ datagen = ImageDataGenerator(
       shear_range = 25.0,
       brightness_range = [0.2, 1.0],
       zoom_ range = [0.5, 1.5],
-      h o r i z o n t a l _ f l i p = F al s e , )
-h i s t o r y _ c o n v = conv_model . f i t _ g e n e r a t o r ( d at a g e n . fl ow ( X _t r ai n ,
-Y _t r ai n , b a t c h _ s i z e = 3 2 ) , v a l i d a t i o n _ d a t a = ( X _t e st , Y _ t e s t ) ,
-s t e p s _ p e r _ e p o c h = l e n (X) / 3 2 , e p o c h s = 6 0 )
+      horizontal_flip = False)
+history_conv = conv_model.fit_generator(datagen.flow(X_train, Y_train, batch_size= 32), validation_data = (X_test, Y_test),
+steps_per_epoch = len(X)/32 , epochs = 60)
 ```
-We generated 3000 images which we passed through our DataGenerator with
-validation split of 0.2. Model loss and model accuracy plots can be found in the
-Appendix
-
-### Plate Detection Conclusion 
-Reflecting on our plate detection model, it performed as expected during the
-competition, although it missed one of the outer plates, which was an issue that
-we had observed through testing. It was an issue that we were able to significantly
-reduce its occurrence but not completely eliminate. The difficulty of fixing this
-problem, is that there are many factors that could cause such error i.e. the HSV
-masking thresholds, the constrictions on the expected size of the contour. In future
-iterations we would revisit each part individually and try to optimize, as well as
-exploring new approaches to cross validate results.
+We generated 3000 images which we passed through our DataGenerator with a validation split of 0.2. Pictured below are our model loss and model accuracy plots:  
+<pre> Model Loss Plot <pre>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnLoss.png?raw=true"/>
+<pre> Model Accuracy Plot <pre>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnAccuracy.png?raw=true"/>
 
 ## Object Detection 
-### Pedestrian Detection 
-In order to detect the pedestrians we utilized the distinct colour of their lower
-body by converting the frame to HSV and masking it based on the thresholds that
-we experimentally determined. To reduce redundant computational expenditure
-we only monitored for pedestrians once the position of the robot reached on a
-parallel line positioned before the crosswalks. In order to ensure that no collision
-would occur our agent would wait first for the pedestrian to pass once through the
-crosswalk and then continue navigating
-### Vehicle Detection 
-Similar to the pedestrian detection we utilized distinct colours from the vehicle to
-mask our frame, the thresholds were experimentally determined. To ensure that
-we don’t collide with the vehicle and to avoid having to monitor its position while
-we are navigating the inner loop, before entering the inner loop we would wait until the position of the vehicle is far enough such that we would safely not get in
-contact with the vehicle
-### Conclusion 
-The Object Detection was one of the last modules we implemented, which is why
-we were time constricted when optimizing it. This is why we emphasized on
-developing a safe system rather than a fast one,which of course came as a trade-off
-in run time. We were satisfied in using HSV masking to detect both the vehicle
-and pedestrians, but in future iterations we would revisit our strategy for handing
-both pedestrian and vehicle detection.
-Some improvements for the pedestrians could be monitoring the red line before the
-crosswalk instead the robots outer loop position, since the red line is closer to the
-cross walk and would allow a faster response. In regards of the vehicle handling we
-would explore the approach of constantly monitoring the vehicle, while entering
-directly to the inner loop. This is an approach that we did not have sufficient time
-to test and compare with our metod.
+### Pedestrian and Truck Detection 
+Once again, we used **HSV colour masking** in **OpenCV** to detect and avoid pedestrians and the truck. 
+
 
 
 
