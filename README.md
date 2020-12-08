@@ -85,7 +85,7 @@ Using a python script, we generated thousands of license plates, extracted their
 <pre> Example License Plate </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true"/>\
 <pre> Data generation and Neural Network Training Pipeline </pre>  
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.png?raw=true"/>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.PNG?raw=true"/>
 
 
 ### Convoluted Neural Network 
