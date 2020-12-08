@@ -1,7 +1,7 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and trucks, and to accuractely recognize and read alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely recognize and read alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
 **Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
 
@@ -9,7 +9,7 @@
 
 <br>
 <pre>Competition Surface Rendered in Gazebo</pre>
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/compSurface.PNG?raw=true" width="600" height="600"/>\
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/compSurface.PNG?raw=true" width="600" height="600"/>
 <br>
 
 ### Technologies Used 
@@ -23,110 +23,60 @@
     
 
 ## Software Components 
-- main script that would handle the image processing and decision making of the agent
-- Robot class: a class that would handle the interaction between the simulation and our main script
+- main python script: contains image processing functions and control algorithms. 
+- Robot class: responsible for interactions with the Gazebo simulation. 
     - Since our only data input was live image feed from the simulation, we decided to use the unique color that elements of interest had i.e. the blue colour of the boxes, the white lines. Hence, for most of our decision making we utilize colour masking after converting our RGB image feed to HSV. 
-- Convolutional Neural Network with three layers which we trained and validated through custom data that we generated.
+- Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we collected and provided. 
 
 ## Robot Class
-In this section we explore the class we created to handle the interaction between the Gazebo world and our main script. 
+The robot class is responsible for interactions with the simulated world. 
 
 ### Constructor 
-The attributes of the Robot object initialized consist an inner loop position tracker
-and an outer loop position tracker of our robot which describe the position of our
-robot in regards of the number of parallel lines we have encountered on the road
-(more on this in the navigation section),and an image view attribute which holds
-the latest image feed from the simulation.
-We also also initialize three private objects, a Subscriber to the image topic from
-the Gazebo simulation,a Publisher to report the license plate information after we
-have successfully identified one and another Publisher to change the linear and
-angular velocity of the robot. 
+The robot object is initialized with: 
+-  an inner loop position tracker for navigating the inner loop
+-  an outer loop position tracker for navigating the outer loop 
+-  an image view attribute to contain the latest image from coming from the live-image feed. 
+-  a ROS Subscriber to the image topic from Gazebo 
+-  a ROS Publisher to report the license plate characters that the neural network parses 
+-  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes. 
 
 ### Methods 
-We use a collection of public and private methods in order to serve the needs of
-the Robot Class, and perhaps the most important is the subscriber Callback. Its
-operation works as follows, whenever a new image is published from the simulation
-our callback function, converts the Gazebo Image to an OpenCV RGB image, by
-using the bridge python package, then it updates our image view attribute, which is
-then continuously used by our main algorithm.
+-   __getImage:
+    -   Subscriber callback function
+    -   converts the Gazebo 'Image' into an OpenCV RGB image using the 'cv_bridge' python package 
+    -   updates the robot's 'view' attribute 
+-   publishLicensePlate: 
+    -   publishes the parsed license plate using the ROS Publisher attribute of the robot 
+-   linearChange, angularChange: 
+    -   controls the navigation of the robot 
+- imageSliceVer, imageSliceHor, imageSliceVertical: 
+    -   using the 'cv2' python package, these methods process the live-feed image and aid in navigation. 
 
 ## Autonomous Navigation 
 ### Position Tracking
-One of the most crucial components of our system was our position tracking, since
-this information was utilized for most of our decision making of our agent. As
-one can see from Figure A.1 throughout the competition route there are parallel
-white lines between sections of the road. That is something we noticed towards the
-later stages of the competition, and decided to exploit, since it would allow us to
-eliminate tasks such as recognizing the plate location, and it provided a smoother
-and reliable transition when switching from the outer loop to the inner loop.
-In order to identify the parallel lines, we collected data with different RGB
-values of the road and then took the lower and upper thresholds of our interest and
-applied masking to our frame after converting it to HSV. The challenging part of
-this process was to take into account the different lighting, and hence different
-RGB values that occurred across the map. Thankfully the contrast between the
-darker section of the road and the parallel lines was significant enough, to return
-us the desired output. Another challenge we faced with was to avoid recounting
-a parallel line. This mainly occurred, when the bot had to change for a longer
-period its angular velocity while correcting its position. In order to fix this bug,
-we incorporated a debouncer in the system. To identify the optimal threshold, we
-tested our algorithm with different real-time factors.
+Accurate position tracking is imperative for autonomous navigation. Paying very close **attention to detail**, we noticed that the competition track has markings that are slightly lighter than the rest of the track. We decided to use these lines to track the robot's position on the track. Fun fact: we were the only partnership to notice this detail and it ended up being very helpful! 
 
-### Navigation: Outer Loop
-In order to navigate across the outer loop, we constantly monitored the outer white
-line.By knowing the distance of our robot from the line we were able to create a
-three case scenario using a fixed threshold and by navigating CCW:
+Using **colour masking** in OpenCV, we produced a mask in which the grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the white lines. 
+
+In order to avoid double-counting the marker lines, we also added a delay between lines as a "debouncer." 
+
+<br>
+<pre>We tracked the robot's position by noting the number of light-grey lines passed ... </pre>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600"/>
+<br>
+
+### Proportional-Derivative Navigation Algorithm 
+In order to navigate across the outer loop, we monitored the robot's distance to outer perimeter of the road and adjusted its navigation accordingly via a **Proportional-Derivative control algorithm**. 
 -  Robot is too far from the line: TURN RIGHT
 -  Robot is too close to the line: TURN LEFT
 -  Drive Straight otherwise <br>
   <br>
-This system allowed us to safely navigate across the outer loop without braking
-any of the traffic rules. We shortly noticed though, that due to the fixed thresholds
-our navigation was very dependent towards the initial condition, and if we didn’t
-start in an optimal position while entering the outer loop, our license plate readings
-were heavily affected. Since our initial state was very unreliable we wanted to
-create a resilient system that would correct itself, regardless of the initial conditions,
-and hence we tried to introduce PID control. The greatest challenge with introducing PID control, was that both the angular
-and linear velocities of the robot were fixed, but we shortly noticed that that we
-could alter our fixed threshold states. We included a Proportional and Derivative
-error which were calculated as following:
-The Proportional Error by the difference of the distances between the previous
-and current measurement multiplied by a constant
-The Derivative Error, by the change of distance throughout time multiplied by a
-constant. 
 
-### Navigation: Inner Loop 
-Similar to the outer loop we followed a similar approach for the inner loop, but
-instead moving CW now and following the outer left line. The main difference
-between inner and outer loop, was that the white line that covers the outside
-perimeter of the inner loop is not continuous. We were able to solve this issue by
-utilizing our reliable navigation system and position tracking. Although it can not
-be clearly seen in the Figure A.1 similar to the outer loop there are parallel lines
-in the inner loop, which we kept on track as well. There was always a parallel
-line before and after a discontinuity, and hence when entering one we could just
-drive straight till we reach the end of the discontinuity, our PID control then would
-correct our position if we entered the discontinuity with an angle.
+The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
 
-### Initial Condition 
-Finally in regards of our initial condition, our algorithm consisted of driving straight
-till it detected a white line towards the bottom of the frame, after that our regular
-outer loop line following protocol would commence. A great challenge that we
-faced in this project in regards of the initial condition, was that the in several test
-runs, our system would identify the white line sooner than expected, which would
-cause an error when entering our main algorithm. We were able to significantly
-reduce the occurrence of this error, by constricting the threshold in which the line
-could be identified, but we were unable to fully fix the bug.
+The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
 
-### Navigation Conclusion 
-We were satisfied with the overall performance of our navigation module, although
-there are certainly improvements that we would consider for future iterations.
-We would try to optimize our initial condition handling. Perhaps by taking a
-greater portion of the frame and normalizing it to find the average distance from
-our robot to the white line, which would potentially give more reliable readings.
-We could also explore new methods such as initially following the inner left line,
-and switching to the outer line once we have crossed a parallel line prior to the first
-box.
-
-## Neural Network For Alphanumeric Characters
+## Neural Network For Alphanumeric Character Detection 
 
 ### License Plate Detection 
 Each box contained two rectangular contours. The first one had the information for
