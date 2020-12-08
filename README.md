@@ -80,7 +80,9 @@ The Derivative component was calculated by multiplying by a constant the change 
 ### License Plate Detection 
 Using **colour masking** and looking for the known aspect ratio of the license plate, we extracted the license plate from the robot's live-image feed. While we discuss ideal images of license plates next, the license plates extracted from the Gazebo world were often sheared, blurry, and imperfect due to the robot's motion and angle! 
 
-<pre> Using a python script, we generated thousands of these license plates, extracted their characters, and input them into our neural network for training. </pre> 
+Using a python script, we generated thousands of license plates, extracted their characters, and input them into our neural network for training.
+
+<pre> Example License Plate </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true"/>\
 <pre> Data generation and Neural Network Training Pipeline </pre>  
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.png?raw=true"/>
@@ -105,7 +107,7 @@ conv_model.add(layers.Flatten())
 conv_model.add(layers.Dropout(0.3))
 conv_model.add(layers.Dense(256,activation = ’relu’))
 conv_model.add(layers.Dense(36,activation = ’softmax’))
-```py
+```
 
 <pre> Summary of the CNN model (DELETE: appendix A Figure A.2.) </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnSummary.png?raw=true"/>\
@@ -124,7 +126,7 @@ datagen = ImageDataGenerator(
       horizontal_flip = False)
 history_conv = conv_model.fit_generator(datagen.flow(X_train, Y_train, batch_size= 32), validation_data = (X_test, Y_test),
 steps_per_epoch = len(X)/32 , epochs = 60)
-```py
+```
 We generated 3000 images which we passed through our DataGenerator with a validation split of 0.2. Pictured below are our model loss and model accuracy plots:  
 <pre> Model Loss Plot  </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnLoss.png?raw=true"/>
