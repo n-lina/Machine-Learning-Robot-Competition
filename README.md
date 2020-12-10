@@ -110,7 +110,7 @@ conv_model.add(layers.Dense(36,activation = ’softmax’))
 ```
 
 <pre> Summary of the CNN model (DELETE: appendix A Figure A.2.) </pre> 
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true"/>\
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true" width="300"/>\
 
 Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 piexels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
 
@@ -129,9 +129,9 @@ steps_per_epoch = len(X)/32 , epochs = 60)
 ```
 We generated 3000 images which we passed through our DataGenerator with a validation split of 0.2. Pictured below are our model loss and model accuracy plots:  
 <pre> Model Loss Plot  </pre> 
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelLoss.PNG?raw=true"/>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelLoss.PNG?raw=true" width="300"/>
 <pre> Model Accuracy Plot </pre> 
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelAccuracy.PNG?raw=true"/>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelAccuracy.PNG?raw=true" width="300"/>
 
 ## Object Detection 
 ### Pedestrian and Truck Detection 
