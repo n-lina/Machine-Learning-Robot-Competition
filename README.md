@@ -25,55 +25,7 @@
 ## Software Components 
 - main python script: contains image processing functions and control algorithms. 
 - Robot class: responsible for interactions with the Gazebo simulation. 
-    - Since our only data input was live image feed from the simulation, we decided to use the unique color that elements of interest had i.e. the blue colour of the boxes, the white lines. Hence, for most of our decision making we utilize colour masking after converting our RGB image feed to HSV. 
-- Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we collected and provided. 
-
-## Robot Class
-The robot class is responsible for interactions with the simulated world. 
-
-### Constructor 
-The robot object is initialized with: 
--  an inner loop position tracker for navigating the inner loop
--  an outer loop position tracker for navigating the outer loop 
--  an image view attribute to contain the latest image from coming from the live-image feed. 
--  a ROS Subscriber to the image topic from Gazebo 
--  a ROS Publisher to report the license plate characters that the neural network parses 
--  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes. 
-
-### Methods 
--   __getImage:
-    -   Subscriber callback function
-    -   converts the Gazebo 'Image' into an OpenCV RGB image using the 'cv_bridge' python package 
-    -   updates the robot's 'view' attribute 
--   publishLicensePlate: 
-    -   publishes the parsed license plate using the ROS Publisher attribute of the robot 
--   linearChange, angularChange: 
-    -   controls the navigation of the robot 
-- imageSliceVer, imageSliceHor, imageSliceVertical: 
-    -   using the 'cv2' python package, these methods process the live-feed image and aid in navigation. 
-
-## Autonomous Navigation 
-### Position Tracking
-Accurate position tracking is imperative for autonomous navigation. Paying very close **attention to detail**, we noticed that the competition track has markings that are slightly lighter than the rest of the track. We decided to use these lines to track the robot's position on the track. Fun fact: we were the only partnership to notice this detail and it ended up being very helpful! 
-
-Using **colour masking** in OpenCV, we produced a mask in which the grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the white lines. 
-
-In order to avoid double-counting the marker lines, we also added a delay between lines as a "debouncer." 
-
-<br>
-<pre>We tracked the robot's position by noting the number of light-grey lines passed ... </pre>
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600"/>
-<br>
-
-### Proportional-Derivative Navigation Algorithm 
-In order to navigate across the outer loop, we monitored the robot's distance to outer perimeter of the road and adjusted its navigation accordingly via a **Proportional-Derivative control algorithm**. 
--  Robot is too far from the line: TURN RIGHT
--  Robot is too close to the line: TURN LEFT
--  Drive Straight otherwise <br>
-  <br>
-The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
-
-The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
+- Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we generated. 
 
 ## Neural Network For Alphanumeric Character Detection 
 
@@ -132,6 +84,51 @@ We generated 3000 images which we passed through our DataGenerator with a valida
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelLoss.PNG?raw=true" width="300"/>
 <pre> Model Accuracy Plot </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelAccuracy.PNG?raw=true" width="300"/>
+
+## Robot Class
+The robot class is responsible for interactions with the simulated world. 
+
+### Constructor 
+The robot object is initialized with: 
+-  an inner loop position tracker for navigating the inner loop
+-  an outer loop position tracker for navigating the outer loop 
+-  an image view attribute to contain the latest image from coming from the live-image feed. 
+-  a ROS Subscriber to the image topic from Gazebo 
+-  a ROS Publisher to report the license plate characters that the neural network parses 
+-  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes. 
+
+### Methods 
+-   __getImage:
+    -   Subscriber callback function
+    -   converts the Gazebo 'Image' into an OpenCV RGB image using the 'cv_bridge' python package 
+    -   updates the robot's 'view' attribute 
+-   publishLicensePlate: 
+    -   publishes the parsed license plate using the ROS Publisher attribute of the robot 
+-   linearChange, angularChange: 
+    -   controls the navigation of the robot 
+- imageSliceVer, imageSliceHor, imageSliceVertical: 
+    -   using the 'cv2' python package, these methods process the live-feed image and aid in navigation. 
+
+## Autonomous Navigation 
+### Position Tracking
+Accurate position tracking is imperative for autonomous navigation. Paying very close **attention to detail**, we noticed that the competition track has markings that are slightly lighter than the rest of the track. We decided to use these lines to track the robot's position on the track. Fun fact: we were the only partnership to notice this detail and it ended up being very helpful! 
+
+Using **colour masking** in OpenCV, we produced a mask in which the grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the white lines. 
+
+In order to avoid double-counting the marker lines, we also added a delay between lines as a "debouncer." 
+
+<br>
+<pre>We tracked the robot's position by noting the number of light-grey lines passed ... </pre>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600"/>
+### Proportional-Derivative Navigation Algorithm 
+In order to navigate across the outer loop, we monitored the robot's distance to outer perimeter of the road and adjusted its navigation accordingly via a **Proportional-Derivative control algorithm**. 
+-  Robot is too far from the line: TURN RIGHT
+-  Robot is too close to the line: TURN LEFT
+-  Drive Straight otherwise <br>
+  <br>
+The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
+
+The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
 
 ## Object Detection 
 ### Pedestrian and Truck Detection 
