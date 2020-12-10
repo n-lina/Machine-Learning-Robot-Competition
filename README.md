@@ -119,13 +119,14 @@ In order to avoid double-counting the marker lines, we also added a delay betwee
 
 <br>
 <pre>We tracked the robot's position by noting the number of light-grey lines passed ... </pre>
-<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600"/>
+<img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600"/> 
+<br>
+
 ### Proportional-Derivative Navigation Algorithm 
 In order to navigate across the outer loop, we monitored the robot's distance to outer perimeter of the road and adjusted its navigation accordingly via a **Proportional-Derivative control algorithm**. 
--  Robot is too far from the line: TURN RIGHT
--  Robot is too close to the line: TURN LEFT
--  Drive Straight otherwise <br>
-  <br>
+-  Robot too far from the perimeter: TURN RIGHT
+-  Robot is too close to the perimeter: TURN LEFT
+-  Drive straight otherwise <br>
 The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
 
 The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
