@@ -127,6 +127,8 @@ In order to navigate across the outer loop, we monitored the robot's distance to
 -  Robot too far from the perimeter: TURN RIGHT
 -  Robot is too close to the perimeter: TURN LEFT
 -  Drive straight otherwise <br>
+
+<br>
 The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
 
 The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
