@@ -98,15 +98,15 @@ The robot object is initialized with:
 -  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes. 
 
 ### Methods 
--   __getImage:
+-   **__getImage:**
     -   Subscriber callback function
     -   converts the Gazebo 'Image' into an OpenCV RGB image using the 'cv_bridge' python package 
     -   updates the robot's 'view' attribute 
--   publishLicensePlate: 
+-   **publishLicensePlate: **
     -   publishes the parsed license plate using the ROS Publisher attribute of the robot 
--   linearChange, angularChange: 
+-   **linearChange, angularChange: **
     -   controls the navigation of the robot 
-- imageSliceVer, imageSliceHor, imageSliceVertical: 
+- **imageSliceVer, imageSliceHor, imageSliceVertical: **
     -   using the 'cv2' python package, these methods process the live-feed image and aid in navigation. 
 
 ## Autonomous Navigation 
