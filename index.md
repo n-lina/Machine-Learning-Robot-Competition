@@ -61,7 +61,7 @@ conv_model.add(layers.Dense(256,activation = ’relu’))
 conv_model.add(layers.Dense(36,activation = ’softmax’))
 ```
 
-<pre> Summary of the CNN model (DELETE: appendix A Figure A.2.) </pre> 
+<pre> Summary of the CNN model </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true" width="400"/>
 
 Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 piexels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
