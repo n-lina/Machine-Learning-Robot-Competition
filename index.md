@@ -1,7 +1,7 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To autonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To autonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accurately parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
 **Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses. In the case of a tie, the time the robot took to complete the competition course is considered. 
 
