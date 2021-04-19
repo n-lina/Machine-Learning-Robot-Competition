@@ -1,9 +1,9 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To autonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
-**Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
+**Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses. In the case of a tie, the time the robot took to complete the competition course is considered. 
 
 **Result:** Placed 4th out of 20 teams!
 
@@ -30,7 +30,7 @@
 ## Neural Network For Alphanumeric Character Detection 
 
 ### License Plate Detection 
-Using **colour masking** and looking for the known aspect ratio of the license plate, we extracted the license plate from the robot's live-image feed. While we discuss ideal images of license plates next, the license plates extracted from the Gazebo world were often sheared, blurry, and imperfect due to the robot's motion and angle! 
+Using **colour masking** and looking for the known aspect ratio of the license plate, we extracted the license plate from the robot's live-image feed. While we discuss ideal images of license plates next, the license plates extracted from the Gazebo world were often sheared, blurry, and imperfect due to the robot's motion and angle.
 
 Using a python script, we generated thousands of license plates, extracted their characters, and input them into our neural network for training.
 
@@ -64,10 +64,10 @@ conv_model.add(layers.Dense(36,activation = ’softmax’))
 <pre> Summary of the CNN model </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true" width="400"/>
 
-Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 piexels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
+Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 pixels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
 
 ### Convoluted Neural Network Training and Validation 
-To best replicate the actual inputs coming from the Gazebo simulation, we used Gaussian Blur to lower the image quality of the perfect license plates. We also targeted 'difficult' characters, like 'B' vs. '8' or '1' vs. 'I', by generating an abundance of input data with these characters. We used **Keras** ImageDataGenerator to then generate a representative collection of inputs: 
+To best replicate the actual inputs coming from the Gazebo simulation, we used a 'Gaussian Blur' filter to lower the image quality of the perfect license plates. We also targeted 'difficult' characters, like 'B' vs. '8' or '1' vs. 'I', by generating an abundance of input data with these characters. We used **Keras** ImageDataGenerator to then generate a representative collection of inputs: 
 
 ```py
 datagen = ImageDataGenerator(
@@ -113,7 +113,7 @@ The robot object is initialized with:
 ### Position Tracking
 Accurate position tracking is imperative for autonomous navigation. Paying very close **attention to detail**, we noticed that the competition track has markings that are slightly lighter than the rest of the track. We decided to use these lines to track the robot's position on the track. Fun fact: we were the only partnership to notice this detail and it ended up being very helpful! 
 
-Using **colour masking** in OpenCV, we produced a mask in which the grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the white lines. 
+Using **colour masking** in OpenCV, we produced a mask in which these grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the lines. 
 
 In order to avoid double-counting the marker lines, we also added a delay between lines as a "debouncer." 
 
@@ -129,9 +129,9 @@ In order to navigate across the outer loop, we monitored the robot's distance to
 -  Drive straight otherwise <br>
 
 <br>
-The Proportional component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
+The 'Proportional' component was calculated by multiplying by a constant the difference between the robot's last position and current position. 
 
-The Derivative component was calculated by multiplying by a constant the change in the robot's position over time. 
+The 'Derivative' component was calculated by multiplying by a constant the change in the robot's position over time. 
 
 ## Object Detection 
 ### Pedestrian and Truck Detection 
