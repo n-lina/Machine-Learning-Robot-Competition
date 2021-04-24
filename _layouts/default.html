@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Machine Learning Robot Competition | Machine-Learning-Robot-Competition</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Machine Learning Robot Competition" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Placing 4th out of 20 teams, my partnership’s victory is accredited to our attention to detail and creativity - OpenCV, Keras, and Python helped as well!" />
+<meta property="og:description" content="Placing 4th out of 20 teams, my partnership’s victory is accredited to our attention to detail and creativity - OpenCV, Keras, and Python helped as well!" />
+<link rel="canonical" href="https://n-lina.github.io/Machine-Learning-Robot-Competition/" />
+<meta property="og:url" content="https://n-lina.github.io/Machine-Learning-Robot-Competition/" />
+<meta property="og:site_name" content="Machine-Learning-Robot-Competition" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Machine Learning Robot Competition" />
+<script type="application/ld+json">
+{"description":"Placing 4th out of 20 teams, my partnership’s victory is accredited to our attention to detail and creativity - OpenCV, Keras, and Python helped as well!","url":"https://n-lina.github.io/Machine-Learning-Robot-Competition/","@type":"WebSite","headline":"Machine Learning Robot Competition","name":"Machine-Learning-Robot-Competition","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="/Machine-Learning-Robot-Competition/assets/css/style.css?v=e842547e34aa1c2fa2724084bef3f2f87f1fff53">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Machine Learning Robot Competition</h1>
+      <h2 class="project-tagline">Placing 4th out of 20 teams, my partnership’s victory is accredited to our attention to detail and creativity — OpenCV, Keras, and Python helped as well!</h2>
+      
+        <a href="https://github.com/n-lina/Machine-Learning-Robot-Competition" class="btn">View on GitHub</a>
+      
+      
+    </section>
+
+    <section class="main-content">
+      <h1 id="machine-learning-robot-competition">Machine Learning Robot Competition</h1>
+<h2 id="competition-overview">Competition Overview</h2>
+
+<p><strong>Task:</strong> To autonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accurately parse alphanumeric “license plates” on parked cars in the simulation using machine learning principles.</p>
+
+<p><strong>Competition Criterion:</strong> Points are awarded for every license plate the convoluted neural network accurately parses. In the case of a tie, the time the robot took to complete the competition course is considered.</p>
+
+<p><strong>Result:</strong> Placed 4th out of 20 teams!</p>
+
+<p><br /></p>
+<pre>Competition Surface Rendered in Gazebo</pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/compSurface.PNG?raw=true" width="600" height="600" />
+<br /></p>
+
+<h3 id="technologies-used">Technologies Used</h3>
+<ul>
+  <li><strong>Gazebo Physics Engine:</strong> the 3D Robotics simulation that served as the competition surface</li>
+  <li><strong>Robot Operating System:</strong> a flexible framework for writing robot software, used to define the robot object</li>
+  <li><strong>Python Programming Language:</strong> used to process the robot’s interactions with its environment; used to implemenent autonomous navigation, alphanumeric character detection via a neural network, and object detection via OpenCV
+    <ul>
+      <li><strong>OpenCV:</strong> used Open Computer Vision to allow the robot to sense its environment and to avoid pedestrians and the truck.</li>
+    </ul>
+  </li>
+  <li><strong>Keras:</strong> a deep learning API written in Python, running on top of Tensorflow</li>
+  <li><strong>Tensorflow:</strong> the open-source library for a number of various tasks in machine learning
+    <ul>
+      <li>Keras and Tensorflow were used to develop, train, and test the convoluted neural network responsible for alphanumeric license plate parsing.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="software-components">Software Components</h2>
+<ul>
+  <li>main python script: contains image processing functions and control algorithms.</li>
+  <li>Robot class: responsible for interactions with the Gazebo simulation.</li>
+  <li>Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we generated.</li>
+</ul>
+
+<h2 id="neural-network-for-alphanumeric-character-detection">Neural Network For Alphanumeric Character Detection</h2>
+
+<h3 id="license-plate-detection">License Plate Detection</h3>
+<p>Using <strong>colour masking</strong> and looking for the known aspect ratio of the license plate, we extracted the license plate from the robot’s live-image feed. While we discuss ideal images of license plates next, the license plates extracted from the Gazebo world were often sheared, blurry, and imperfect due to the robot’s motion and angle.</p>
+
+<p>Using a python script, we generated thousands of license plates, extracted their characters, and input them into our neural network for training.</p>
+
+<pre> Example License Plate </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/plate.png?raw=true" width="200" /></p>
+<pre> Data Generation and Neural Network Training Pipeline </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnPipeline.PNG?raw=true" width="500" /></p>
+
+<h3 id="convoluted-neural-network">Convoluted Neural Network</h3>
+<p>The architecture of our Convolutional Neural Network is as Following:</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="n">conv_model</span> <span class="o">=</span> <span class="n">models</span><span class="p">.</span><span class="n">Sequential</span><span class="p">()</span>
+<span class="c1">#BLOCK 1
+</span><span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">activation</span><span class="o">=</span><span class="err">’</span><span class="n">relu</span><span class="err">’</span><span class="p">,</span> <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">MaxPooling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="c1">#BLOCK 2
+</span><span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">activation</span> <span class="o">=</span> <span class="err">’</span><span class="n">relu</span><span class="err">’</span><span class="p">))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">MaxPooling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="c1">#BLOCK 3
+</span><span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">32</span><span class="p">,(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">activation</span><span class="o">=</span> <span class="err">’</span><span class="n">relu</span><span class="err">’</span><span class="p">))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">MaxPooling2D</span> <span class="p">((</span> <span class="mi">2</span> <span class="p">,</span> <span class="mi">2</span> <span class="p">)))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Flatten</span><span class="p">())</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span><span class="n">activation</span> <span class="o">=</span> <span class="err">’</span><span class="n">relu</span><span class="err">’</span><span class="p">))</span>
+<span class="n">conv_model</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">layers</span><span class="p">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span><span class="n">activation</span> <span class="o">=</span> <span class="err">’</span><span class="n">softmax</span><span class="err">’</span><span class="p">))</span>
+</code></pre></div></div>
+
+<pre> Summary of the CNN model </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true" width="400" /></p>
+
+<p>Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 pixels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our “Convolution-Max Pooling” value three.</p>
+
+<h3 id="convoluted-neural-network-training-and-validation">Convoluted Neural Network Training and Validation</h3>
+<p>To best replicate the actual inputs coming from the Gazebo simulation, we used a ‘Gaussian Blur’ filter to lower the image quality of the perfect license plates. We also targeted ‘difficult’ characters, like ‘B’ vs. ‘8’ or ‘1’ vs. ‘I’, by generating an abundance of input data with these characters. We used <strong>Keras</strong> ImageDataGenerator to then generate a representative collection of inputs:</p>
+
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">datagen</span> <span class="o">=</span> <span class="n">ImageDataGenerator</span><span class="p">(</span>
+      <span class="n">rescale</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span>
+      <span class="n">shear_range</span> <span class="o">=</span> <span class="mf">25.0</span><span class="p">,</span>
+      <span class="n">brightness_range</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+      <span class="n">zoom_</span> <span class="nb">range</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+      <span class="n">horizontal_flip</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span>
+<span class="n">history_conv</span> <span class="o">=</span> <span class="n">conv_model</span><span class="p">.</span><span class="n">fit_generator</span><span class="p">(</span><span class="n">datagen</span><span class="p">.</span><span class="n">flow</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span> <span class="mi">32</span><span class="p">),</span> <span class="n">validation_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">Y_test</span><span class="p">),</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">/</span><span class="mi">32</span> <span class="p">,</span> <span class="n">epochs</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span>
+</code></pre></div></div>
+<p>We generated 3000 images which we passed through our DataGenerator with a validation split of 0.2. Pictured below are our model loss and model accuracy plots:</p>
+<pre> Model Loss Plot  </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelLoss.PNG?raw=true" width="300" /></p>
+<pre> Model Accuracy Plot </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelAccuracy.PNG?raw=true" width="300" /></p>
+
+<h2 id="robot-class">Robot Class</h2>
+<p>The robot class is responsible for interactions with the simulated world.</p>
+
+<h3 id="constructor">Constructor</h3>
+<p>The robot object is initialized with:</p>
+<ul>
+  <li>an inner loop position tracker for navigating the inner loop</li>
+  <li>an outer loop position tracker for navigating the outer loop</li>
+  <li>an image view attribute to contain the latest image from coming from the live-image feed.</li>
+  <li>a ROS Subscriber to the image topic from Gazebo</li>
+  <li>a ROS Publisher to report the license plate characters that the neural network parses</li>
+  <li>a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes.</li>
+</ul>
+
+<h3 id="methods">Methods</h3>
+<ul>
+  <li><strong>__getImage:</strong>
+    <ul>
+      <li>Subscriber callback function</li>
+      <li>converts the Gazebo ‘Image’ into an OpenCV RGB image using the ‘cv_bridge’ python package</li>
+      <li>updates the robot’s ‘view’ attribute</li>
+    </ul>
+  </li>
+  <li><strong>publishLicensePlate:</strong>
+    <ul>
+      <li>publishes the parsed license plate using the ROS Publisher attribute of the robot</li>
+    </ul>
+  </li>
+  <li><strong>linearChange, angularChange:</strong>
+    <ul>
+      <li>controls the navigation of the robot</li>
+    </ul>
+  </li>
+  <li><strong>imageSliceVer, imageSliceHor, imageSliceVertical:</strong>
+    <ul>
+      <li>using the ‘cv2’ python package, these methods process the live-feed image and aid in navigation.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="autonomous-navigation">Autonomous Navigation</h2>
+<h3 id="position-tracking">Position Tracking</h3>
+<p>Accurate position tracking is imperative for autonomous navigation. Paying very close <strong>attention to detail</strong>, we noticed that the competition track has markings that are slightly lighter than the rest of the track. We decided to use these lines to track the robot’s position on the track. Fun fact: we were the only partnership to notice this detail and it ended up being very helpful!</p>
+
+<p>Using <strong>colour masking</strong> in OpenCV, we produced a mask in which these grey lines were bright white while the rest of the image was completely black. This allowed the robot to easily detect the lines.</p>
+
+<p>In order to avoid double-counting the marker lines, we also added a delay between lines as a “debouncer.”</p>
+
+<p><br /></p>
+<pre>We tracked the robot's position by noting the number of light-grey lines passed ... </pre>
+<p><img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/position.png?raw=true" width="600" height="600" /> 
+<br /></p>
+
+<h3 id="proportional-derivative-navigation-algorithm">Proportional-Derivative Navigation Algorithm</h3>
+<p>In order to navigate across the outer loop, we monitored the robot’s distance to outer perimeter of the road and adjusted its navigation accordingly via a <strong>Proportional-Derivative control algorithm</strong>.</p>
+<ul>
+  <li>Robot too far from the perimeter: TURN RIGHT</li>
+  <li>Robot is too close to the perimeter: TURN LEFT</li>
+  <li>Drive straight otherwise <br /></li>
+</ul>
+
+<p><br />
+The ‘Proportional’ component was calculated by multiplying by a constant the difference between the robot’s last position and current position.</p>
+
+<p>The ‘Derivative’ component was calculated by multiplying by a constant the change in the robot’s position over time.</p>
+
+<h2 id="object-detection">Object Detection</h2>
+<h3 id="pedestrian-and-truck-detection">Pedestrian and Truck Detection</h3>
+<p>Once again, we used <strong>HSV colour masking</strong> in <strong>OpenCV</strong> to detect and avoid pedestrians and the truck.</p>
+
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/n-lina/Machine-Learning-Robot-Competition">Machine-Learning-Robot-Competition</a> is maintained by <a href="https://github.com/n-lina">n-lina</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </section>
+
+    
+  </body>
+</html>
