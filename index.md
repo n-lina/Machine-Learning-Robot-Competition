@@ -25,7 +25,7 @@
 ## Software Components 
 - main python script: contains image processing functions and control algorithms. 
 - Robot class: responsible for interactions with the Gazebo simulation. 
-- Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we generated. 
+- Convoluted Neural Network: a neutral network with three layers, trained and validated using input data we generated. 
 
 ## Neural Network For Alphanumeric Character Detection 
 
@@ -41,7 +41,7 @@ Using a python script, we generated thousands of license plates, extracted their
 
 
 ### Convoluted Neural Network 
-The architecture of our Convolutional Neural Network is as Following:
+The architecture of our Convoluted Neural Network is as Following:
 
 ``` py 
 from keras import models
