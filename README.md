@@ -1,9 +1,9 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accuractely parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accurately parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
-**Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by time robot took to complete the competition course.
+**Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by the time the robot took to complete the competition course.
 
 **Result:** Placed 4th out of 20 teams!
 
@@ -15,7 +15,7 @@
 ### Technologies Used 
 -   **Gazebo Physics Engine:** the 3D Robotics simulation that served as the competition surface 
 -   **Robot Operating System:** a flexible framework for writing robot software, used to define the robot object
--   **Python Programming Language:** used to process the robot's interactions with its environment; used to implemenent autonomous navigation, alphanumeric character detection via a neural network, and object detection via OpenCV
+-   **Python:** used to process the robot's interactions with its environment and to implemenent autonomous navigation, alphanumeric character detection via a neural network created using Keras, and object detection via OpenCV
     -    **OpenCV:** used Open Computer Vision to allow the robot to sense its environment and to avoid pedestrians and the truck. 
 -   **Keras:** a deep learning API written in Python, running on top of Tensorflow
 -   **Tensorflow:** the open-source library for a number of various tasks in machine learning
@@ -25,7 +25,7 @@
 ## Software Components 
 - main python script: contains image processing functions and control algorithms. 
 - Robot class: responsible for interactions with the Gazebo simulation. 
-- Convolutional Neural Network: a neutral network with three layers, trained and validated using input data we generated. 
+- Convoluted Neural Network: a neutral network with three layers, trained and validated using input data we generated. 
 
 ## Neural Network For Alphanumeric Character Detection 
 
@@ -41,7 +41,7 @@ Using a python script, we generated thousands of license plates, extracted their
 
 
 ### Convoluted Neural Network 
-The architecture of our Convolutional Neural Network is as Following:
+The architecture of our Convoluted Neural Network is as Following:
 
 ``` py 
 from keras import models
@@ -64,7 +64,7 @@ conv_model.add(layers.Dense(36,activation = ’softmax’))
 <pre> Summary of the CNN model (DELETE: appendix A Figure A.2.) </pre> 
 <img src="https://github.com/n-lina/Machine-Learning-Robot-Competition/blob/master/cnnModelSummary.PNG?raw=true" width="400"/>
 
-Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 piexels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
+Designing the architecture of the CNN, we noticed that the average character extracted from a perfect license plate was 28x30 pixels, but around 32x32 pixels from the Gazebo world. To avoid inaccuracy due to distortion, we trained our CNN using 32x32 pixel images instead, making our "Convolution-Max Pooling" value three. 
 
 ### Convoluted Neural Network Training and Validation 
 To best replicate the actual inputs coming from the Gazebo simulation, we used Gaussian Blur to lower the image quality of the perfect license plates. We also targeted 'difficult' characters, like 'B' vs. '8' or '1' vs. 'I', by generating an abundance of input data with these characters. We used **Keras** ImageDataGenerator to then generate a representative collection of inputs: 
