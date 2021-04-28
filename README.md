@@ -1,7 +1,7 @@
 # Machine Learning Robot Competition
 ## Competition Overview
 
-**Task:** To atonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accurately parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
+**Task:** To autonomously navigate the simulated world via a live-image feed, avoiding moving obstacles like pedestrians and the truck, and to accurately parse alphanumeric "license plates" on parked cars in the simulation using machine learning principles. 
 
 **Competition Criterion:** Points are awarded for every license plate the convoluted neural network accurately parses, and in the case of a tie, by the time the robot took to complete the competition course.
 
@@ -92,10 +92,10 @@ The robot class is responsible for interactions with the simulated world.
 The robot object is initialized with: 
 -  an inner loop position tracker for navigating the inner loop
 -  an outer loop position tracker for navigating the outer loop 
--  an image view attribute to contain the latest image from coming from the live-image feed. 
+-  an image view attribute to contain the latest image from coming from the live-image feed
 -  a ROS Subscriber to the image topic from Gazebo 
 -  a ROS Publisher to report the license plate characters that the neural network parses 
--  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes. 
+-  a ROS Publisher to change the linear and angular velocity of the robot for nagivation purposes
 
 ### Methods 
 -   __getImage:
